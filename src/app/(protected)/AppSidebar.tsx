@@ -142,7 +142,7 @@ const AppSidebar = () => {
             })}
             {open && (
               <SidebarMenuItem>
-                <Link href="/create-page">
+                <Link href="/create">
                   <Button
                     variant="outline"
                     className="mt-2 w-full cursor-pointer"
