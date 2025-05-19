@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import useRefetch from "@/hooks/use-refetch";
 
 type FormInput = {
   repoUrl: string;
@@ -14,6 +15,7 @@ type FormInput = {
 const CreatePage = () => {
   const { register, handleSubmit, reset } = useForm<FormInput>();
   const createProject = api.project.createTRPCRouter.useMutation();
+  const refetch = useRefetch();
 
   const onSubmit = (data: FormInput) => {
     createProject.mutate(
@@ -25,6 +27,8 @@ const CreatePage = () => {
       {
         onSuccess: () => {
           toast.success("Project created successfully");
+          refetch();
+          reset();
         },
         onError: () => {
           toast.error("Failed to create project");
@@ -69,7 +73,11 @@ const CreatePage = () => {
                 {...register("githubToken", { required: false })}
                 placeholder="GitHub Token (Optional)"
               />
-              <Button type="submit" disabled={createProject.isPending}>
+              <Button
+                type="submit"
+                disabled={createProject.isPending}
+                className="cursor-pointer"
+              >
                 Create Project
               </Button>
             </form>
