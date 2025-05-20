@@ -1,5 +1,7 @@
+import axios from "axios";
 import { db } from "@/server/db";
 import { Octokit } from "octokit";
+import { summariseCommitDiff } from "./gemini";
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -15,6 +17,7 @@ type Response = {
   commitDate: string;
 };
 
+// Fetch all commit hashes of the github repo
 export const getCommitHashes = async (
   githubUrl: string,
 ): Promise<Response[]> => {
@@ -27,6 +30,7 @@ export const getCommitHashes = async (
     owner,
     repo,
   });
+
   const sortedCommits = data.sort(
     (a: any, b: any) =>
       new Date(b.commit.author.date).getTime() -
@@ -42,18 +46,15 @@ export const getCommitHashes = async (
   }));
 };
 
-export const pullCommits = async (projectId: string) => {
-  const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
-  const commitHashes = await getCommitHashes(githubUrl);
-  const unprocessedCommits = await filterUnprocessedCommits(
-    projectId,
-    commitHashes,
-  );
-  console.log(unprocessedCommits);
-  return unprocessedCommits;
-};
-
-async function summariseCommmit(githubUrl: string, commitHash: string) {}
+async function summariseCommmit(githubUrl: string, commitHash: string) {
+  // get the diff and pass it to Gemini
+  const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+    headers: {
+      Accept: "application/vnd/.github.v3.diff",
+    },
+  });
+  return (await summariseCommitDiff(data)) || "";
+}
 
 async function fetchProjectGithubUrl(projectId: string) {
   const project = await db.project.findUnique({
@@ -82,5 +83,43 @@ async function filterUnprocessedCommits(
   );
   return unprocessedCommits;
 }
+
+export const pullCommits = async (projectId: string) => {
+  const { githubUrl } = await fetchProjectGithubUrl(projectId);
+  const commitHashes = await getCommitHashes(githubUrl);
+  const unprocessedCommits = await filterUnprocessedCommits(
+    projectId,
+    commitHashes,
+  );
+  const summaryResponse = await Promise.allSettled(
+    unprocessedCommits.map((commit) => {
+      return summariseCommmit(githubUrl, commit.commitHash);
+    }),
+  );
+  const summaries = summaryResponse.map((response) => {
+    if (response.status === "fulfilled") {
+      return response.value as string;
+    }
+    return "";
+  });
+
+  const commits = await db.commit.createMany({
+    data: summaries.map((summary, index) => {
+      console.log("Processing summaries: ", index);
+
+      return {
+        projectId: projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary,
+      };
+    }),
+  });
+
+  return commits;
+};
 
 await pullCommits("cmauuxlfv00037qusf89tjfz4");
