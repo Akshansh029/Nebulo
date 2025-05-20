@@ -42,6 +42,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
+    "react-spinners": "^0.17.0",
     "server-only": "^0.0.1",
     "sonner": "^2.0.3",
     "superjson": "^2.2.1",

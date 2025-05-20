@@ -4,6 +4,7 @@ import { SignOutButton } from "@clerk/nextjs";
 import { ExternalLink, GithubIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import CommitLog from "./commit-log";
 
 const Dashboard = () => {
   const { project } = useProject();
@@ -39,7 +40,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="mt-8">Commit log</div>
+        <div className="mt-8 text-wrap">
+          <CommitLog />
+        </div>
       </div>
     </div>
   );

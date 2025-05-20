@@ -121,5 +121,3 @@ export const pullCommits = async (projectId: string) => {
 
   return commits;
 };
-
-await pullCommits("cmauuxlfv00037qusf89tjfz4");
