@@ -7,8 +7,6 @@ export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-const githubUrl = "https://github.com/docker/genai-stack";
-
 type Response = {
   commitHash: string;
   commitMessage: string;
@@ -37,7 +35,7 @@ export const getCommitHashes = async (
       new Date(a.commit.author.date).getTime(),
   ) as any[];
 
-  return sortedCommits.slice(0, 10).map((commit) => ({
+  return sortedCommits.slice(0, 15).map((commit) => ({
     commitHash: commit.sha as string,
     commitMessage: commit.commit.message ?? "",
     commitAuthorName: commit.commit?.author?.name,
@@ -53,7 +51,11 @@ async function summariseCommmit(githubUrl: string, commitHash: string) {
       Accept: "application/vnd/.github.v3.diff",
     },
   });
-  return (await summariseCommitDiff(data)) || "";
+  const summary = await summariseCommitDiff(data);
+  if (!summary) {
+    console.warn(`No summary returned for commit ${commitHash}`);
+  }
+  return summary;
 }
 
 async function fetchProjectGithubUrl(projectId: string) {

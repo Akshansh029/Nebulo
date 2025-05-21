@@ -61,7 +61,10 @@ const CommitLog = () => {
                   </div>
                   <span className="font-semibold">{commit.commitMessage}</span>
                   <pre className="mt-3 text-sm leading-6 whitespace-pre-wrap">
-                    {commit.summary}
+                    {commit.summary === ""
+                      ? `No summary returned for commit ${commit.commitHash}`
+                      : commit.summary}
+                    {/* {JSON.stringify(commit, null, 2)} */}
                   </pre>
                 </div>
               </li>
