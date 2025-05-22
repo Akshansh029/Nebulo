@@ -1,10 +1,10 @@
 "use client";
 import useProject from "@/hooks/use-project";
-import { SignOutButton } from "@clerk/nextjs";
 import { ExternalLink, GithubIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import CommitLog from "./commit-log";
+import QuestionCard from "./question-card";
 
 const Dashboard = () => {
   const { project } = useProject();
@@ -34,9 +34,9 @@ const Dashboard = () => {
           <span className="">Archive button</span>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 w-full">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-            Askquestion Card Meeting Card
+            <QuestionCard /> Meeting Card
           </div>
         </div>
 

@@ -123,7 +123,6 @@ const generateEmbeddings = async (docs: Document[]) => {
   return pMap(
     docs,
     async (doc) => {
-      console.log("Summarizing", doc.metadata.source);
       const summary = await safeSummarise(doc);
       const embedding = await generateEmbedding(summary);
       return {
