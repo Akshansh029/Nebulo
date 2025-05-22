@@ -10,7 +10,6 @@ const Dashboard = () => {
   const { project } = useProject();
   return (
     <div className="">
-      <h1>{project?.id}</h1>
       <div className="flex flex-wrap items-center justify-center gap-y-4">
         <div className="bg-primary flex w-fit rounded-md px-4 py-3">
           <GithubIcon className="size-5 text-white" />

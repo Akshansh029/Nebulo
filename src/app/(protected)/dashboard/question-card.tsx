@@ -18,6 +18,7 @@ import CodeReferences from "./code-references";
 import { MoonLoader } from "react-spinners";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import useRefetch from "@/hooks/use-refetch";
 
 const QuestionCard: React.FC = () => {
   const { project } = useProject();
@@ -65,6 +66,8 @@ const QuestionCard: React.FC = () => {
     }
   };
 
+  const refetch = useRefetch();
+
   return (
     <>
       <Dialog
@@ -96,6 +99,7 @@ const QuestionCard: React.FC = () => {
                       onSuccess: () => {
                         setOpen(false);
                         toast.success("Answer saved");
+                        refetch();
                       },
                       onError: () => {
                         toast.error("Failed to save answer");
@@ -133,7 +137,6 @@ const QuestionCard: React.FC = () => {
               />
             </div>
 
-            {/* Code references */}
             <div className="flex-[1] overflow-auto">
               <CodeReferences fileReferences={fileReferences} />
             </div>
@@ -166,7 +169,11 @@ const QuestionCard: React.FC = () => {
               onChange={(e) => setQuestion(e.target.value)}
               disabled={loading}
             />
-            <Button type="submit" disabled={loading}>
+            <Button
+              className="w-fit cursor-pointer"
+              type="submit"
+              disabled={loading}
+            >
               {loading ? "Asking..." : "Ask Nebulo"}
             </Button>
           </form>
