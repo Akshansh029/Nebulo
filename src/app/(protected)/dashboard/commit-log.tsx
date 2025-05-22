@@ -1,5 +1,5 @@
 "use client";
-import { PacmanLoader } from "react-spinners";
+import { MoonLoader } from "react-spinners";
 import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -17,7 +17,7 @@ const CommitLog = () => {
     <div>
       {isPending ? (
         <p>
-          <PacmanLoader color="#8E51FF" />
+          <MoonLoader color="#8E51FF" />
         </p>
       ) : (
         <ul className="space-y-6">

@@ -123,3 +123,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Works in modern browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #a0aec0; /* Gray-400 */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #718096; /* Gray-600 */
+}
