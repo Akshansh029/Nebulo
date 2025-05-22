@@ -16,6 +16,8 @@ import { askQuestion } from "./actions";
 import { readStreamableValue } from "ai/rsc";
 import CodeReferences from "./code-references";
 import { MoonLoader } from "react-spinners";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
 const QuestionCard: React.FC = () => {
   const { project } = useProject();
@@ -27,6 +29,8 @@ const QuestionCard: React.FC = () => {
     { fileName: string; sourceCode: string; summary: string }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
+
+  const saveAnswer = api.project.saveAnswer.useMutation();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,9 +76,37 @@ const QuestionCard: React.FC = () => {
       >
         <DialogContent className="flex h-full flex-col bg-white p-6 sm:max-w-[90vw]">
           <DialogHeader>
-            <DialogTitle>
-              <Shapes />
-            </DialogTitle>
+            <div className="flex items-center gap-4">
+              <DialogTitle>
+                <Shapes />
+              </DialogTitle>
+              <Button
+                disabled={saveAnswer.isPending}
+                className="cursor-pointer"
+                variant={"default"}
+                onClick={() => {
+                  saveAnswer.mutate(
+                    {
+                      projectId: project!.id,
+                      question: question,
+                      answer: answer,
+                      filesReferences: fileReferences,
+                    },
+                    {
+                      onSuccess: () => {
+                        setOpen(false);
+                        toast.success("Answer saved");
+                      },
+                      onError: () => {
+                        toast.error("Failed to save answer");
+                      },
+                    },
+                  );
+                }}
+              >
+                {saveAnswer.isPending ? "Saving..." : "Save Answer"}
+              </Button>
+            </div>
           </DialogHeader>
 
           {error && (
