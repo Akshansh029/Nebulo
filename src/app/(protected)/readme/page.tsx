@@ -19,6 +19,9 @@ import { api } from "@/trpc/react";
 import useProject from "@/hooks/use-project";
 import { generateReadme } from "./actions";
 import { toast } from "sonner";
+import React from "react";
+import ReadmeViewer from "./readme-viewer";
+import useRefetch from "@/hooks/use-refetch";
 
 const ReadmePage = () => {
   const [markdown, setMarkdown] = useState(
@@ -30,6 +33,7 @@ const ReadmePage = () => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [save, setSave] = useState(false);
+
   const { projectId } = useProject();
   const { data: summaries } = api.project.getSummaries.useQuery({ projectId });
 
@@ -93,6 +97,9 @@ const ReadmePage = () => {
     }
   }
 
+  const refetch = useRefetch();
+
+  // Save readme func
   const readme = api.project.saveReadme.useMutation();
   const saveReadme = async () => {
     readme.mutate(
@@ -103,6 +110,7 @@ const ReadmePage = () => {
       {
         onSuccess: () => {
           toast.success("Readme saved");
+          refetch();
         },
         onError: () => {
           toast.error("Failed to save Readme");
@@ -216,6 +224,7 @@ const ReadmePage = () => {
           </Button>
         )}
       </div>
+      <ReadmeViewer />
     </main>
   );
 };

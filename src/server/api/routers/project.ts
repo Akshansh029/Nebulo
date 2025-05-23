@@ -130,4 +130,20 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
+
+  getReadme: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.readme.findMany({
+      where: {
+        userId: ctx.user.userId!,
+      },
+      select: {
+        readme: true,
+        createdAt: true,
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
 });
