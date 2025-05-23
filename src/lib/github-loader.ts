@@ -10,7 +10,10 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Calls summariseCode(), retrying on 429 with exponential back-off.
  */
-async function safeSummarise(doc: Document, retries = 3): Promise<string> {
+export async function safeSummarise(
+  doc: Document,
+  retries = 3,
+): Promise<string> {
   try {
     const result = await summariseCode(doc);
     return result ?? "";
@@ -112,7 +115,7 @@ export async function loadGitHubRepo(githubUrl: string, githubToken?: string) {
   return loader.load();
 }
 
-function isCodeFile(filename: string) {
+export function isCodeFile(filename: string) {
   return /\.(js|jsx|ts|tsx|py|rb|go|java|css|html)$/.test(filename);
 }
 

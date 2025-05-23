@@ -1,24 +1,39 @@
 "use client";
 import { Input } from "@/components/ui/input";
+import { readStreamableValue } from "ai/rsc";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Copy, Download } from "lucide-react";
 import MDEditor from "@uiw/react-md-editor";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { useState } from "react";
+import { api } from "@/trpc/react";
+import useProject from "@/hooks/use-project";
+import { generateReadme } from "./actions";
+import { toast } from "sonner";
 
 const ReadmePage = () => {
   const [markdown, setMarkdown] = useState(
     "# Project Title\n\n## Description\n\n## Tech Stack\n\n## Features\n\n## Usage\n",
   );
-  const [selectedSections, setSelectedSections] = useState<string[]>([
-    "Project title",
-    "Description",
-    "Tech stack",
-    "Features",
-    "Usage instructions",
-  ]);
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [outputStyle, setOutputStyle] = useState("minimal");
+  const [badgeInt, setBadgeInt] = useState("");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { projectId } = useProject();
+  const { data: summaries } = api.project.getSummaries.useQuery({ projectId });
+
+  // Creating array of badge strings
+  const badgeIntegration: string[] = badgeInt.split(",").map((s) => s.trim());
 
   const toggleSection = (section: string) => {
     setSelectedSections((prev) =>
@@ -33,6 +48,7 @@ const ReadmePage = () => {
     setCopied(true);
   };
 
+  // .md file download func
   const downloadMarkdown = () => {
     const blob = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
@@ -42,6 +58,26 @@ const ReadmePage = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  // Readme generation
+  async function fetchReadme() {
+    setLoading(true);
+
+    const stream = await generateReadme(
+      summaries!,
+      selectedSections,
+      outputStyle,
+      badgeIntegration,
+    );
+
+    let output = "";
+    for await (const chunk of readStreamableValue(stream)) {
+      output += chunk;
+    }
+    setLoading(false);
+    setMarkdown(output);
+    toast.success("README Generated successfully");
+  }
 
   return (
     <main className="space-y-6 p-2">
@@ -60,10 +96,14 @@ const ReadmePage = () => {
             <div className="mt-2 space-y-2">
               {[
                 "Installation",
-                "Usage",
                 "API Reference",
                 "Contributing",
                 "Screenshots",
+                "Future Improvements",
+                "Known Issues",
+                "FAQ",
+                "Acknowledgements",
+                "License",
               ].map((section) => (
                 <div key={section} className="flex items-center space-x-2">
                   <Checkbox
@@ -79,11 +119,35 @@ const ReadmePage = () => {
 
           <div className="space-y-2">
             <label className="font-medium">2. Badge Integrations</label>
-            <Input placeholder="e.g. GitHub stars, license, CI status badge" />
+            <Input
+              placeholder="e.g. GitHub stars, license, CI status badge"
+              className="mt-2"
+              value={badgeInt}
+              onChange={(e) => setBadgeInt(e.target.value)}
+            />
           </div>
 
-          <Button variant="default" className="cursor-pointer">
-            Generate README
+          <div className="space-y-2">
+            <label className="font-medium">3. Select Output Style</label>
+            <Select value={outputStyle} onValueChange={setOutputStyle}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Choose a style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="detailed">Detailed</SelectItem>
+                <SelectItem value="dev-friendly">Dev-friendly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            variant="default"
+            className="cursor-pointer"
+            onClick={fetchReadme}
+            disabled={loading}
+          >
+            {loading ? "Generating..." : "Generate README"}
           </Button>
         </CardContent>
       </Card>
@@ -93,13 +157,9 @@ const ReadmePage = () => {
         <MDEditor
           value={markdown}
           onChange={(value) => setMarkdown(value || "")}
-          height={400}
+          height={500}
           className="rounded-md"
           style={{
-            //       backgroundColor: "#f9fafb",
-            //       border: "1px solid #e5e7eb",
-            //       borderRadius: "0.5rem",
-            //       padding: "1rem",
             fontFamily: "Inter, sans-serif",
           }}
         />

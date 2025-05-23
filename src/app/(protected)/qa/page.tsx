@@ -21,7 +21,6 @@ const QAPage = () => {
     projectId,
   });
   const question = questions?.[questionIndex];
-  console.log(questions);
 
   return (
     <Sheet>
