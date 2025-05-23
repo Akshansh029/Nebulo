@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import CommitLog from "./commit-log";
 import QuestionCard from "./question-card";
+import MeetingCard from "./meeting";
 
 const Dashboard = () => {
   const { project } = useProject();
@@ -33,13 +34,14 @@ const Dashboard = () => {
           <span className="">Archive button</span>
         </div>
 
-        <div className="mt-4 w-full">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-            <QuestionCard /> Meeting Card
+        <div className="mt-4 h-fit w-full">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
+            <QuestionCard />
+            <MeetingCard />
           </div>
         </div>
 
-        <div className="mt-8 text-wrap">
+        <div className="mt-4 text-wrap">
           <CommitLog />
         </div>
       </div>

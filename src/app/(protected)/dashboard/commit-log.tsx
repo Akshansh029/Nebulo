@@ -17,7 +17,7 @@ const CommitLog = () => {
     <div>
       {isPending ? (
         <p>
-          <MoonLoader color="#8E51FF" />
+          <MoonLoader color="#8E51FF" size={50} />
         </p>
       ) : (
         <ul className="space-y-6">

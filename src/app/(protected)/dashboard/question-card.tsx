@@ -152,7 +152,7 @@ const QuestionCard: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Card className="col-span-3">
+      <Card className="col-span-3 h-full">
         <CardHeader>
           <CardTitle>Ask a question</CardTitle>
         </CardHeader>

@@ -50,7 +50,6 @@ ${diff}
 };
 
 export async function summariseCode(doc: Document) {
-  console.log("Getting summary for ", doc.metadata.source);
   try {
     const code = doc.pageContent.slice(0, 10000);
     const response = await model.generateContent([

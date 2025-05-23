@@ -17,12 +17,11 @@ import { cn } from "@/lib/utils";
 import {
   Bot,
   CreditCard,
+  FileText,
   LayoutDashboard,
   Plus,
-  Presentation,
   ShapesIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -38,9 +37,9 @@ const items = [
     icon: Bot,
   },
   {
-    title: "Meetings",
-    url: "/meetings",
-    icon: Presentation,
+    title: "Readme",
+    url: "/readme",
+    icon: FileText,
   },
   {
     title: "Billing",
