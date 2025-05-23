@@ -63,20 +63,31 @@ const ReadmePage = () => {
   async function fetchReadme() {
     setLoading(true);
 
-    const stream = await generateReadme(
-      summaries!,
-      selectedSections,
-      outputStyle,
-      badgeIntegration,
-    );
+    try {
+      const stream = await generateReadme(
+        summaries!,
+        selectedSections,
+        outputStyle,
+        badgeIntegration,
+      );
 
-    let output = "";
-    for await (const chunk of readStreamableValue(stream)) {
-      output += chunk;
+      let output = "";
+      try {
+        for await (const chunk of readStreamableValue(stream)) {
+          output += chunk;
+        }
+        setMarkdown(output);
+        toast.success("README generated successfully!");
+      } catch (streamErr) {
+        console.error("Error while streaming README:", streamErr);
+        toast.error("⚠️ Error streaming the README output.");
+      }
+    } catch (err) {
+      console.error("Error generating README:", err);
+      toast.error("❌ Failed to generate README. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setMarkdown(output);
-    toast.success("README Generated successfully");
   }
 
   return (
@@ -85,7 +96,7 @@ const ReadmePage = () => {
         <FileText className="h-6 w-6" />
         <h1 className="text-2xl font-bold">README Generator</h1>
       </div>
-
+      {/* Customization options */}
       <Card>
         <CardHeader>
           <CardTitle>Customization Options</CardTitle>
@@ -151,7 +162,7 @@ const ReadmePage = () => {
           </Button>
         </CardContent>
       </Card>
-
+      {/* Markdown Editor component */}
       <div className="flex flex-col gap-4 bg-white p-2">
         <h1 className="text-xl font-semibold text-black">Preview</h1>
         <MDEditor
@@ -165,6 +176,7 @@ const ReadmePage = () => {
         />
       </div>
 
+      {/* Copy and download button */}
       <div className="flex gap-2">
         <Button onClick={copyToClipboard} variant="outline">
           <Copy className="mr-1 h-4 w-4" /> {copied ? "Copied!" : "Copy"}
