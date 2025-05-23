@@ -30,6 +30,11 @@ const QAPage = () => {
       <div className="h-4"></div>
       <h1 className="text-xl font-semibold">Saved Questions</h1>
       <div className="h-2"></div>
+      {questions?.length === 0 && (
+        <div className="text-muted-foreground mt-20 flex w-full items-center justify-center text-lg">
+          Oops! You haven't saved any questions
+        </div>
+      )}
       {isPending ? (
         <div className="mt-6 flex w-full justify-center">
           <MoonLoader color="#8E51FF" size={50} />

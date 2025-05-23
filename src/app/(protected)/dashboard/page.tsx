@@ -6,9 +6,12 @@ import React from "react";
 import CommitLog from "./commit-log";
 import QuestionCard from "./question-card";
 import MeetingCard from "./meeting";
+import { MoonLoader } from "react-spinners";
+import ArchiveButton from "./archive-button";
+import InviteButton from "./invite-button";
 
 const Dashboard = () => {
-  const { project } = useProject();
+  const { project, isPending } = useProject();
   return (
     <div className="">
       <div className="flex flex-wrap items-center justify-center gap-y-4">
@@ -21,7 +24,7 @@ const Dashboard = () => {
                 className="underline decoration-1 underline-offset-2"
                 href={project?.githubUrl! ?? ""}
               >
-                {project?.githubUrl}
+                {isPending ? "Loading..." : project?.githubUrl}
               </Link>
             </p>
             <ExternalLink className="ml-2 size-4 text-white" />
@@ -30,8 +33,8 @@ const Dashboard = () => {
 
         <div className="flex items-center gap-4">
           <span className="">Team members</span>
-          <span className="">Invite button</span>
-          <span className="">Archive button</span>
+          <InviteButton />
+          <ArchiveButton />
         </div>
 
         <div className="mt-4 h-fit w-full">

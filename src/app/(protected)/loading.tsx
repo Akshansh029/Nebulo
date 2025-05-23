@@ -1,9 +1,10 @@
 import React from "react";
+import { MoonLoader } from "react-spinners";
 
 const LoadingPage = () => {
   return (
     <div className="flex h-screen w-full items-center justify-center">
-      <h1 className="text-3xl text-gray-300">Loading...</h1>
+      <MoonLoader color="#8E51FF" size={75} />
     </div>
   );
 };
