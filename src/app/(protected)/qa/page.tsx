@@ -21,10 +21,13 @@ const QAPage = () => {
     projectId,
   });
   const question = questions?.[questionIndex];
+  console.log(questions);
 
   return (
     <Sheet>
-      <QuestionCard />
+      <div className="h-fit">
+        <QuestionCard />
+      </div>
       <div className="h-4"></div>
       <h1 className="text-xl font-semibold">Saved Questions</h1>
       <div className="h-2"></div>
