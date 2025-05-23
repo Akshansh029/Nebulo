@@ -27,6 +27,8 @@ model User{
     UserToProject UserToProject[]
 
     questionAsked Question[]
+
+    Readme Readme[]
 }
 
 model Project{
@@ -43,6 +45,8 @@ model Project{
 
     SourceCodeEmbedding SourceCodeEmbedding[]
     savedQuestions Question[]
+
+    Readme Readme[]
 }
 
 model UserToProject{
@@ -96,6 +100,19 @@ model Question{
     answer  String
     filesReferences Json?
 
+    projectId   String
+    project Project @relation(fields: [projectId], references: [id])
+
+    userId  String
+    user    User @relation(fields: [userId], references: [id])
+}
+
+model Readme{
+    id  String @id @default(cuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    readme  String
     projectId   String
     project Project @relation(fields: [projectId], references: [id])
 

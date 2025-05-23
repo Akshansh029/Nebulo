@@ -113,4 +113,21 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
+
+  saveReadme: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        readme: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.readme.create({
+        data: {
+          readme: input.readme,
+          projectId: input.projectId,
+          userId: ctx.user.userId!,
+        },
+      });
+    }),
 });

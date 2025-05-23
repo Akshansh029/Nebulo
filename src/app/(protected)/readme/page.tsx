@@ -29,11 +29,13 @@ const ReadmePage = () => {
   const [badgeInt, setBadgeInt] = useState("");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [save, setSave] = useState(false);
   const { projectId } = useProject();
   const { data: summaries } = api.project.getSummaries.useQuery({ projectId });
 
   // Creating array of badge strings
   const badgeIntegration: string[] = badgeInt.split(",").map((s) => s.trim());
+  console.log(selectedSections);
 
   const toggleSection = (section: string) => {
     setSelectedSections((prev) =>
@@ -77,6 +79,7 @@ const ReadmePage = () => {
           output += chunk;
         }
         setMarkdown(output);
+        setSave(true);
         toast.success("README generated successfully!");
       } catch (streamErr) {
         console.error("Error while streaming README:", streamErr);
@@ -89,6 +92,24 @@ const ReadmePage = () => {
       setLoading(false);
     }
   }
+
+  const readme = api.project.saveReadme.useMutation();
+  const saveReadme = async () => {
+    readme.mutate(
+      {
+        projectId: projectId,
+        readme: markdown,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Readme saved");
+        },
+        onError: () => {
+          toast.error("Failed to save Readme");
+        },
+      },
+    );
+  };
 
   return (
     <main className="space-y-6 p-2">
@@ -184,6 +205,16 @@ const ReadmePage = () => {
         <Button onClick={downloadMarkdown} variant="outline">
           <Download className="mr-1 h-4 w-4" /> Export .md
         </Button>
+        {markdown && (
+          <Button
+            onClick={saveReadme}
+            disabled={!save || readme.isPending}
+            variant="default"
+            className="cursor-pointer"
+          >
+            {readme.isPending ? "Saving" : "Save Readme"}
+          </Button>
+        )}
       </div>
     </main>
   );
