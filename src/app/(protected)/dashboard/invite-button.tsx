@@ -17,7 +17,7 @@ const InviteButton = () => {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent aria-describedby="Invite dialog">
           <DialogHeader>
             <DialogTitle>Invite Team Members</DialogTitle>
           </DialogHeader>

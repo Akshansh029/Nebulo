@@ -3,13 +3,67 @@ import type { Document } from "@langchain/core/documents";
 import { generateEmbedding, summariseCode } from "./gemini";
 import { db } from "@/server/db";
 import pMap from "p-map";
+import { Octokit } from "octokit";
 
-// tiny sleep helper
+// delay
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Calls summariseCode(), retrying on 429 with exponential back-off.
- */
+export const getFileCount = async (
+  path: string,
+  octokit: Octokit,
+  githubOwner: string,
+  githubRepo: string,
+): Promise<number> => {
+  try {
+    const { data } = await octokit.rest.repos.getContent({
+      owner: githubOwner,
+      repo: githubRepo,
+      path,
+    });
+
+    if (!Array.isArray(data) && data.type === "file") {
+      return 1;
+    }
+
+    if (Array.isArray(data)) {
+      let fileCount = 0;
+      const dirs: string[] = [];
+
+      for (const item of data) {
+        if (item.type === "dir") dirs.push(item.path);
+        else fileCount++;
+      }
+
+      // recurse into sub-dirs
+      const nested = await Promise.all(
+        dirs.map((dir) => getFileCount(dir, octokit, githubOwner, githubRepo)),
+      );
+      return fileCount + nested.reduce((a, b) => a + b, 0);
+    }
+
+    return 0;
+  } catch (err: any) {
+    if (err.status === 404) {
+      throw new Error(
+        `Repository or path not found: ${githubOwner}/${githubRepo}/${path}`,
+      );
+    }
+    // rethrow with message
+    throw new Error(err.message ?? "Failed to fetch repository contents");
+  }
+};
+
+export const checkCredits = async (githubUrl: string, githubToken?: string) => {
+  const octokit = new Octokit({ auth: githubToken });
+  const githubOwner = githubUrl.split("/")[3];
+  const githubRepo = githubUrl.split("/")[4];
+  if (!githubOwner || !githubRepo) return 0;
+
+  const fileCount = await getFileCount("", octokit, githubOwner!, githubRepo);
+  return fileCount;
+};
+
+//  Calls summariseCode(), retrying on 429 with exponential back-off.
 export async function safeSummarise(
   doc: Document,
   retries = 3,

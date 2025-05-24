@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { pullCommits } from "@/lib/github";
-import { indexGithubRepo } from "@/lib/github-loader";
+import {
+  checkCredits,
+  getFileCount,
+  indexGithubRepo,
+} from "@/lib/github-loader";
+import { Octokit } from "octokit";
+import { TRPCError } from "@trpc/server";
 
 export const projectRouter = createTRPCRouter({
   createTRPCRouter: protectedProcedure
@@ -13,6 +19,25 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.user.userId!,
+        },
+        select: {
+          credits: true,
+        },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const userCredits = user?.credits;
+      const fileCount = await checkCredits(input.githubUrl, input.githubToken);
+
+      if (userCredits < fileCount) {
+        throw new Error("Insufficient credits");
+      }
+
       const project = await ctx.db.project.create({
         data: {
           githubUrl: input.githubUrl,
@@ -27,6 +52,16 @@ export const projectRouter = createTRPCRouter({
 
       await indexGithubRepo(project.id, input.githubUrl, input.githubToken!);
       await pullCommits(project.id);
+      await ctx.db.user.update({
+        where: {
+          id: ctx.user.userId!,
+        },
+        data: {
+          credits: {
+            decrement: fileCount,
+          },
+        },
+      });
       return project;
     }),
 
@@ -191,4 +226,54 @@ export const projectRouter = createTRPCRouter({
       },
     });
   }),
+
+  checkCredits: protectedProcedure
+    .input(
+      z.object({
+        githubUrl: z.string().url(),
+        githubToken: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const parts = input.githubUrl.split("/");
+      const githubOwner = parts[3];
+      const githubRepo = parts[4];
+      if (!githubOwner || !githubRepo) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Invalid GitHub URL; expected https://github.com/{owner}/{repo}",
+        });
+      }
+
+      // prepare octokit
+      const octokit = new Octokit({ auth: input.githubToken });
+
+      let fileCount: number;
+      try {
+        fileCount = await getFileCount("", octokit, githubOwner, githubRepo);
+      } catch (err: any) {
+        // convert to a user-friendly tRPC error
+        throw new TRPCError({
+          code: err.message.includes("not found")
+            ? "NOT_FOUND"
+            : "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        });
+      }
+
+      // fetch user credits
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.user.userId! },
+        select: { credits: true },
+      });
+      if (!user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return {
+        fileCount,
+        userCredits: user.credits,
+      };
+    }),
 });
