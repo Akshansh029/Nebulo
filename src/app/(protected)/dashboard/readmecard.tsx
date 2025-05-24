@@ -4,12 +4,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FileText } from "lucide-react";
+import Link from "next/link";
 
-const MeetingCard = () => {
-  const [progress, setProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+const ReadmeCard = () => {
   return (
     <Card className="col-span-3 flex h-fit flex-col items-center justify-center gap-1 p-6">
       <>
@@ -23,12 +20,13 @@ const MeetingCard = () => {
           Powered by AI
         </p>
         <div className="mt-4">
-          <Button disabled={isUploading}>Get Started</Button>
+          <Link href="/readme">
+            <Button className="cursor-pointer">Get Started</Button>
+          </Link>
         </div>
-        {error && <p className="mt-2 text-sm text-red-600">Error: {error}</p>}
       </>
     </Card>
   );
 };
 
-export default MeetingCard;
+export default ReadmeCard;

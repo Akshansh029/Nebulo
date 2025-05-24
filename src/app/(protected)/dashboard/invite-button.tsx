@@ -22,7 +22,7 @@ const InviteButton = () => {
             <DialogTitle>Invite Team Members</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500">
-            Ask team members to copy and paste this link
+            Ask team members paste this link in the browser
           </p>
           <Input
             onClick={() => {

@@ -5,16 +5,16 @@ import Link from "next/link";
 import React from "react";
 import CommitLog from "./commit-log";
 import QuestionCard from "./question-card";
-import MeetingCard from "./meeting";
-import { MoonLoader } from "react-spinners";
 import ArchiveButton from "./archive-button";
 import InviteButton from "./invite-button";
+import ReadmeCard from "./readmecard";
+import TeamMembers from "./team-members";
 
 const Dashboard = () => {
   const { project, isPending } = useProject();
   return (
     <div className="">
-      <div className="flex flex-wrap items-center justify-center gap-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-2">
         <div className="bg-primary flex w-fit rounded-md px-4 py-3">
           <GithubIcon className="size-5 text-white" />
           <div className="ml-2 flex items-center">
@@ -32,7 +32,7 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="">Team members</span>
+          <TeamMembers />
           <InviteButton />
           <ArchiveButton />
         </div>
@@ -40,7 +40,7 @@ const Dashboard = () => {
         <div className="mt-4 h-fit w-full">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
             <QuestionCard />
-            <MeetingCard />
+            <ReadmeCard />
           </div>
         </div>
 
