@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       currency: "INR",
       description: "Nebulo credit purchase",
       notes: {
-        userId: userId,
+        user_id: userId,
         credits: credits.toString(),
       },
       reference_id: `${userId}_${shortTs}`,

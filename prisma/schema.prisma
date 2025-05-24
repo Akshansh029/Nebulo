@@ -29,6 +29,8 @@ model User{
     questionAsked Question[]
 
     Readme Readme[]
+
+    Transactions Transactions[]
 }
 
 model Project{
@@ -118,4 +120,14 @@ model Readme{
 
     userId  String
     user    User @relation(fields: [userId], references: [id])
+}
+
+model Transactions{
+    id  String @id @default(cuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    userId  String
+    user User @relation(fields: [userId], references: [id])
+    credits Int
 }

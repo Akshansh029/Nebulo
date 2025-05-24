@@ -8,16 +8,15 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 
 const BillingPage = () => {
-  // we keep the slider value as a single-element array because that's what Slider expects
   const [creditsToBuy, setCreditsToBuy] = useState<number[]>([100]);
-  const credits = creditsToBuy[0]!; // the actual number
+  const [loading, setLoading] = useState(false);
+  const credits = creditsToBuy[0]!;
   const price = (credits * 1.6).toFixed(2); // ₹1.6 per credit
 
-  // fetch the user's current credits from your own backend
   const { data: user } = api.project.getCredits.useQuery();
 
-  // 1️⃣ This function runs when you click "Buy"
   const handleBuy = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/razorpay", {
         method: "POST",
@@ -33,8 +32,9 @@ const BillingPage = () => {
       }
 
       const { short_url } = await res.json();
-      // 2️⃣ Redirect the browser to Razorpay's hosted checkout
+      // Redirect the browser to Razorpay's hosted checkout
       window.location.href = short_url;
+      setLoading(false);
     } catch (error: any) {
       console.error("Razorpay error:", error);
       toast.error("Unable to initiate payment: " + error.message);
@@ -74,8 +74,14 @@ const BillingPage = () => {
             value={creditsToBuy}
             onValueChange={(v) => setCreditsToBuy(v)}
           />
-          <Button onClick={handleBuy} className="w-fit">
-            Buy {credits} credits for ₹{price}
+          <Button
+            onClick={handleBuy}
+            className="w-fit cursor-pointer"
+            disabled={loading}
+          >
+            {loading
+              ? "Redirecting to Razorpay..."
+              : `Buy ${credits} credits for ₹${price}`}
           </Button>
         </div>
       </div>
