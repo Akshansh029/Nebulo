@@ -39,7 +39,6 @@ const ReadmePage = () => {
 
   // Creating array of badge strings
   const badgeIntegration: string[] = badgeInt.split(",").map((s) => s.trim());
-  console.log(selectedSections);
 
   const toggleSection = (section: string) => {
     setSelectedSections((prev) =>

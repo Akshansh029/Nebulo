@@ -49,7 +49,7 @@ const JoinPage = async (props: Props) => {
       },
     });
   } catch (error) {
-    console.log("Already in the project");
+    toast.error("Already in the project");
   }
 
   return redirect("/dashboard");

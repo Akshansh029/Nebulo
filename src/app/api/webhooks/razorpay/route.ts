@@ -80,9 +80,6 @@ export async function POST(req: NextRequest) {
       case "payment.failed":
         console.error("Payment failed:", payload.payment.entity.id);
         break;
-
-      default:
-        console.log("Unhandled webhook event:", eventType);
     }
   } catch (err) {
     console.error("Error handling webhook:", err);
