@@ -6,7 +6,7 @@ import {
   FileText,
   CreditCard,
   Zap,
-  Search,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,19 +19,48 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { useState } from "react";
+import { motion } from "framer-motion";
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
 
 export default function LandingPage() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
+  const [loading, setLoading] = useState({
+    login: false,
+    signup: false,
+    trial: false,
+  });
+
+  const handleRedirect = (path: string, key: keyof typeof loading) => {
+    setLoading((prev) => ({ ...prev, [key]: true }));
+    // slight delay for spinner visibility
+    setTimeout(() => redirect(path), 300);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50"
+    >
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+      <motion.nav
+        variants={sectionVariants}
+        className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm"
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-                <Sparkles className="size-5 text-white" />
-              </div>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600"
+              >
+                <Sparkles className="h-5 w-5 text-white" />
+              </motion.div>
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
                 Nebulo
               </span>
@@ -49,90 +78,115 @@ export default function LandingPage() {
               >
                 Pricing
               </Button>
-              {isSignedIn ? (
+              {isLoaded && isSignedIn ? (
                 <UserButton />
               ) : (
                 <>
                   <Button
                     variant="outline"
                     className="border-gray-300"
-                    onClick={() => {
-                      redirect("/sign-in");
-                    }}
+                    onClick={() => handleRedirect("/sign-in", "login")}
+                    disabled={loading.login}
                   >
-                    Login
+                    {loading.login ? "Loading…" : "Login"}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    onClick={() => {
-                      redirect("/sign-up");
-                    }}
+                    onClick={() => handleRedirect("/sign-up", "signup")}
+                    disabled={loading.signup}
                   >
-                    Sign Up
+                    {loading.signup ? "Loading…" : "Sign Up"}
                   </Button>
                 </>
               )}
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <Badge className="mb-6 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100">
-              <Sparkles className="mr-1 size-3" />
-              AI-Powered GitHub Analysis
-            </Badge>
-            <h1 className="mb-6 text-4xl font-bold text-gray-900 sm:text-6xl">
-              Understand Any{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Codebase
-              </span>{" "}
-              Instantly
-            </h1>
-            <p className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-gray-600">
-              Transform complex GitHub repositories into clear, actionable
-              insights. Perfect for developers, teams, and newcomers who want to
-              understand codebases quickly.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-lg text-white hover:from-blue-700 hover:to-purple-700"
-                onClick={() => {
-                  redirect("/sign-in");
-                }}
+      <motion.section
+        variants={sectionVariants}
+        className="relative h-[calc(100vh-5rem)] overflow-hidden py-20 sm:py-32"
+      >
+        <motion.div
+          variants={sectionVariants}
+          className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8"
+        >
+          <Badge className="mb-6 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100">
+            <Sparkles className="mr-1 h-3 w-3" />
+            AI-Powered GitHub Analysis
+          </Badge>
+          <motion.h1
+            variants={sectionVariants}
+            className="mb-6 text-4xl font-bold text-gray-900 sm:text-6xl"
+          >
+            Understand Any{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Codebase
+            </span>{" "}
+            Instantly
+          </motion.h1>
+          <motion.p
+            variants={sectionVariants}
+            className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-gray-600"
+          >
+            Transform complex GitHub repositories into clear, actionable
+            insights.
+          </motion.p>
+          <motion.div
+            variants={sectionVariants}
+            className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+          >
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-lg text-white hover:from-blue-700 hover:to-purple-700"
+              onClick={() => handleRedirect("/sign-in", "trial")}
+              disabled={loading.trial}
+            >
+              {loading.trial ? (
+                "Processing…"
+              ) : (
+                <>
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex items-center border-gray-300 px-8 py-3 text-lg"
+              asChild
+            >
+              <a
+                href="https://github.com/Akshansh029/Nebulo"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Start Free Trial
-                <ArrowRight className="ml-2 size-5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-gray-300 px-8 py-3 text-lg"
-              >
-                <a
-                  href="https://github.com/Akshansh029/Nebulo"
-                  target="_blank"
-                  className="flex items-center"
-                >
-                  <Github className="mr-2 size-5" />
-                  View GitHub
-                </a>
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
-              ✨ 150 free credits • No credit card required
-            </p>
-          </div>
-        </div>
+                <Github className="mr-2 h-5 w-5" /> View GitHub
+              </a>
+            </Button>
+          </motion.div>
+          <motion.p
+            variants={sectionVariants}
+            className="mt-4 text-sm text-gray-500"
+          >
+            ✨ 150 free credits • No credit card required
+          </motion.p>
+        </motion.div>
 
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 size-20 animate-pulse rounded-full bg-blue-100 opacity-60"></div>
-        <div className="absolute right-10 bottom-20 size-16 animate-pulse rounded-full bg-purple-100 opacity-60 [animation-delay:1s]"></div>
-      </section>
+        <motion.div
+          className="absolute top-20 left-10 h-20 w-20 rounded-full bg-blue-200 opacity-60"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute right-10 bottom-20 h-16 w-16 rounded-full bg-purple-200 opacity-60"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+        />
+      </motion.section>
 
       {/* Features Section */}
       <section className="bg-white py-20">
@@ -168,7 +222,7 @@ export default function LandingPage() {
             <Card className="border-0 bg-gradient-to-br from-purple-50 to-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-purple-100">
-                  <Search className="size-6 text-purple-600" />
+                  <Bot className="size-6 text-purple-600" />
                 </div>
                 <CardTitle className="text-xl">AI-Powered Q&A</CardTitle>
                 <CardDescription>
@@ -360,112 +414,24 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 py-12 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <div className="mb-4 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-                  <Sparkles className="size-5 text-white" />
-                </div>
-                <span className="text-xl font-bold">Nebulo</span>
-              </div>
-              <p className="text-gray-400">
-                AI-powered GitHub repository analysis for developers and teams.
-              </p>
+      <footer className="flex flex-col justify-around gap-4 bg-gray-900 px-8 py-12 text-white md:flex-row">
+        <div className="">
+          <div className="mb-4 flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
+              <Sparkles className="size-5 text-white" />
             </div>
-
-            <div>
-              <h3 className="mb-4 font-semibold">Product</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    API
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4 font-semibold">Company</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4 font-semibold">Support</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-white">
-                    Status
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <span className="text-xl font-bold">Nebulo</span>
           </div>
-
-          <div className="mt-8 flex flex-col items-center justify-between border-t border-gray-800 pt-8 sm:flex-row">
-            <p className="text-gray-400">
-              © {new Date().getFullYear()} Nebulo. All rights reserved.
-            </p>
-            <div className="mt-4 flex gap-6 sm:mt-0">
-              <a
-                href="#"
-                className="text-gray-400 transition-colors hover:text-white"
-              >
-                Privacy
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 transition-colors hover:text-white"
-              >
-                Terms
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 transition-colors hover:text-white"
-              >
-                Security
-              </a>
-            </div>
-          </div>
+          <p className="text-gray-400">
+            AI-powered GitHub repository analysis for developers and teams.
+          </p>
+        </div>
+        <div className="flex items-center justify-center">
+          <p className="text-gray-400">
+            © {new Date().getFullYear()} Nebulo. All rights reserved.
+          </p>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }

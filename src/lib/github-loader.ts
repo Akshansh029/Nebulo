@@ -4,6 +4,7 @@ import { generateEmbedding, summariseCode } from "./gemini";
 import { db } from "@/server/db";
 import pMap from "p-map";
 import { Octokit } from "octokit";
+import { error } from "console";
 
 // delay
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -43,12 +44,18 @@ export const getFileCount = async (
 
     return 0;
   } catch (err: any) {
-    if (err.status === 404) {
-      throw new Error(
-        `Repository or path not found: ${githubOwner}/${githubRepo}/${path}`,
-      );
+    console.error("GitHub getContent error:", err);
+
+    // 1️⃣ Rate Limit
+    if (err.status === 403 && /(rate limit|quota)/i.test(err.message)) {
+      // throw a sentinel so the wrapper can detect it
+      throw new Error("RateLimitExceeded");
     }
-    // rethrow with message
+    // 2️⃣ Not Found
+    if (err.status === 404) {
+      throw new Error("RepoNotFound");
+    }
+    // 3️⃣ Other
     throw new Error(err.message ?? "Failed to fetch repository contents");
   }
 };
@@ -59,8 +66,18 @@ export const checkCredits = async (githubUrl: string, githubToken?: string) => {
   const githubRepo = githubUrl.split("/")[4];
   if (!githubOwner || !githubRepo) return 0;
 
-  const fileCount = await getFileCount("", octokit, githubOwner!, githubRepo);
-  return fileCount;
+  try {
+    const fileCount = await getFileCount("", octokit, githubOwner, githubRepo);
+    return fileCount;
+  } catch (err: any) {
+    if (err.message === "RateLimitExceeded") {
+      throw new Error("GitHub API rate limit exceeded.");
+    }
+    if (err.message === "RepoNotFound") {
+      throw new Error("GitHub repository not found.");
+    }
+    throw err;
+  }
 };
 
 //  Calls summariseCode(), retrying on 429 with exponential back-off.

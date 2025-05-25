@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -14,13 +13,13 @@ import {
 } from "@/components/ui/sidebar";
 import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import {
   Bot,
   CreditCard,
   FileText,
   LayoutDashboard,
-  Plus,
-  ShapesIcon,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -62,11 +61,19 @@ const AppSidebar = () => {
             open && "justify-start gap-2",
           )}
         >
-          {/* <Image src="/logo.png" alt="logo" height={40} width={40} /> */}
-          <ShapesIcon />
-          {open && (
-            <h1 className="text-2xl font-bold text-violet-500">Nebulo</h1>
-          )}
+          <div className="flex items-center gap-2">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600"
+            >
+              <Sparkles className="h-5 w-5 text-white" />
+            </motion.div>
+            {open && (
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
+                Nebulo
+              </span>
+            )}
+          </div>
         </div>
       </SidebarHeader>
 
@@ -105,6 +112,7 @@ const AppSidebar = () => {
         <SidebarGroupContent>
           <SidebarMenu>
             {projects?.map((project) => {
+              const isActive = project.id === projectId;
               return (
                 <SidebarMenuItem key={project.name}>
                   <SidebarMenuButton asChild>
@@ -116,13 +124,13 @@ const AppSidebar = () => {
                     >
                       <div
                         className={cn(
-                          "text-primary flex size-6 items-center justify-center rounded-sm border bg-white text-sm",
+                          "text-primary flex h-7 min-h-5 w-7 min-w-5 items-center justify-center rounded-sm border bg-white text-sm font-medium",
                           {
-                            "bg-primary text-white": project.id === projectId,
+                            "bg-primary text-white": isActive,
                           },
                         )}
                       >
-                        {project.name[0]}
+                        {project.name[0]?.toUpperCase()}
                       </div>
                       <span>{project.name}</span>
                     </div>
@@ -130,19 +138,6 @@ const AppSidebar = () => {
                 </SidebarMenuItem>
               );
             })}
-            {open && (
-              <SidebarMenuItem>
-                <Link href="/create">
-                  <Button
-                    variant="outline"
-                    className="mt-2 w-full cursor-pointer"
-                  >
-                    <Plus />
-                    <span>Create Project</span>
-                  </Button>
-                </Link>
-              </SidebarMenuItem>
-            )}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarContent>

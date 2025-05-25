@@ -34,7 +34,6 @@ const BillingPage = () => {
       const { short_url } = await res.json();
       // Redirect the browser to Razorpay's hosted checkout
       window.location.href = short_url;
-      setLoading(false);
     } catch (error: any) {
       console.error("Razorpay error:", error);
       toast.error("Unable to initiate payment: " + error.message);

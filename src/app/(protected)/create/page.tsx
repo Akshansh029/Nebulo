@@ -13,44 +13,48 @@ type FormInput = {
   githubToken?: string;
 };
 
+const TIMEOUT_MS = 10000;
+
 const CreatePage = () => {
   const { register, handleSubmit, reset } = useForm<FormInput>();
   const createProject = api.project.createTRPCRouter.useMutation();
-  const checkCredits = api.project.checkCredits.useMutation({
-    onError(error) {
-      toast.error(`Could not check credits: ${error.message}`);
-    },
-  });
+  const checkCredits = api.project.checkCredits.useMutation();
   const refetch = useRefetch();
 
   // Form submit function
   const onSubmit = (data: FormInput) => {
-    if (!!checkCredits.data) {
-      createProject.mutate(
-        {
-          githubUrl: data.repoUrl,
-          name: data.projectName,
-          githubToken: data.githubToken,
-        },
-        {
-          onSuccess: () => {
-            toast.success("Project created successfully");
-            refetch();
-            reset();
-          },
-          onError: () => {
-            toast.error("Failed to create project");
-          },
-        },
-      );
-    } else {
-      checkCredits.mutate({
+    // If we already have a fileCount, go straight to create
+    if (checkCredits.data) {
+      createProject.mutate({
+        name: data.projectName,
         githubUrl: data.repoUrl,
         githubToken: data.githubToken,
       });
+      return;
     }
 
-    return true;
+    // 1) Start a timeout
+    const timer = setTimeout(() => {
+      toast.error(
+        "GitHub is taking too long to respond. You may have hit the rate limit—try again later or provide a token.",
+      );
+      // Cancel the mutation so it doesn't overwrite a later toast
+      checkCredits.reset();
+    }, TIMEOUT_MS);
+
+    // 2) Trigger the mutation
+    checkCredits.mutate(
+      { githubUrl: data.repoUrl, githubToken: data.githubToken },
+      {
+        onSuccess: () => {
+          clearTimeout(timer);
+        },
+        onError: (err) => {
+          clearTimeout(timer);
+          toast.error(err.message);
+        },
+      },
+    );
   };
 
   const enoughCredits = checkCredits?.data?.userCredits

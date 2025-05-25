@@ -20,22 +20,41 @@ export const projectRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
-        where: {
-          id: ctx.user.userId!,
-        },
-        select: {
-          credits: true,
-        },
+        where: { id: ctx.user.userId! },
+        select: { credits: true },
       });
-      if (!user) {
-        throw new Error("User not found");
+      if (!user)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+
+      let fileCount: number;
+      try {
+        fileCount = await checkCredits(input.githubUrl, input.githubToken);
+      } catch (err: any) {
+        // map our Error messages into TRPCError
+        if (err.message.includes("rate limit")) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: err.message,
+          });
+        }
+        if (err.message.includes("not found")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        });
       }
 
-      const userCredits = user?.credits;
-      const fileCount = await checkCredits(input.githubUrl, input.githubToken);
-
-      if (userCredits < fileCount) {
-        throw new Error("Insufficient credits");
+      // check credits
+      if (user.credits < fileCount) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient credits",
+        });
       }
 
       const project = await ctx.db.project.create({
@@ -235,45 +254,31 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const parts = input.githubUrl.split("/");
-      const githubOwner = parts[3];
-      const githubRepo = parts[4];
-      if (!githubOwner || !githubRepo) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message:
-            "Invalid GitHub URL; expected https://github.com/{owner}/{repo}",
-        });
-      }
-
-      // prepare octokit
-      const octokit = new Octokit({ auth: input.githubToken });
-
       let fileCount: number;
       try {
-        fileCount = await getFileCount("", octokit, githubOwner, githubRepo);
+        fileCount = await checkCredits(input.githubUrl, input.githubToken);
       } catch (err: any) {
-        // convert to a user-friendly tRPC error
+        if (err.message.includes("rate limit")) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: err.message,
+          });
+        }
+        if (err.message.includes("not found")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+        }
         throw new TRPCError({
-          code: err.message.includes("not found")
-            ? "NOT_FOUND"
-            : "INTERNAL_SERVER_ERROR",
+          code: "INTERNAL_SERVER_ERROR",
           message: err.message,
         });
       }
 
-      // fetch user credits
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.user.userId! },
         select: { credits: true },
       });
-      if (!user) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      return {
-        fileCount,
-        userCredits: user.credits,
-      };
+      return { fileCount, userCredits: user.credits };
     }),
 });
