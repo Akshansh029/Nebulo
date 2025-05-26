@@ -17,7 +17,16 @@ const TIMEOUT_MS = 10000;
 
 const CreatePage = () => {
   const { register, handleSubmit, reset } = useForm<FormInput>();
-  const createProject = api.project.createTRPCRouter.useMutation();
+  const createProject = api.project.createTRPCRouter.useMutation({
+    onSuccess: () => {
+      toast.success("Project created successfully");
+      refetch();
+      reset();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
   const checkCredits = api.project.checkCredits.useMutation();
   const refetch = useRefetch();
 

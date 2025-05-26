@@ -117,14 +117,19 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.sourceCodeEmbedding.findMany({
-        where: {
-          projectId: input.projectId,
-        },
-        select: {
-          summary: true,
-        },
-      });
+      try {
+        return await ctx.db.sourceCodeEmbedding.findMany({
+          where: {
+            projectId: input.projectId,
+          },
+          select: {
+            summary: true,
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        throw new Error("File summaries of the repo not found");
+      }
     }),
 
   saveAnswer: protectedProcedure
