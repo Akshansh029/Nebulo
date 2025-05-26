@@ -66,18 +66,6 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Features
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Pricing
-              </Button>
               {isLoaded && isSignedIn ? (
                 <UserButton />
               ) : (
