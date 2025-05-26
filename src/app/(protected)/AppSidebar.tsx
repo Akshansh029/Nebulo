@@ -63,7 +63,7 @@ const AppSidebar = () => {
         >
           <div className="flex items-center gap-2">
             <motion.div
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.05 }}
               className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600"
             >
               <Sparkles className="h-5 w-5 text-white" />
@@ -109,7 +109,7 @@ const AppSidebar = () => {
         <SidebarGroup className="px-0">
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
         </SidebarGroup>
-        <SidebarGroupContent>
+        <SidebarGroupContent className="overflow-y-auto">
           <SidebarMenu>
             {projects?.map((project) => {
               const isActive = project.id === projectId;
@@ -140,6 +140,23 @@ const AppSidebar = () => {
             })}
           </SidebarMenu>
         </SidebarGroupContent>
+
+        {open && (
+          <SidebarGroup className="mx-auto mt-4 text-center">
+            <SidebarMenu>
+              <SidebarMenuItem className="text-muted-foreground text-xs">
+                Toggle Sidebar:{" "}
+                <kbd className="rounded-md bg-zinc-200 px-2 py-1 text-zinc-700">
+                  Ctrl
+                </kbd>{" "}
+                +{" "}
+                <kbd className="rounded-md bg-zinc-200 px-2 py-1 text-zinc-700">
+                  B
+                </kbd>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );

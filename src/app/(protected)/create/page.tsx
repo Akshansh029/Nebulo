@@ -55,6 +55,8 @@ const CreatePage = () => {
         },
       },
     );
+
+    return true;
   };
 
   const enoughCredits = checkCredits?.data?.userCredits
