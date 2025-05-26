@@ -66,12 +66,11 @@ const ReadmePage = () => {
 
   // Readme generation
   async function fetchReadme() {
-    setLoading(true);
-    if (!summaries) {
+    if (!summaries?.length) {
       toast.error("Create a project to generate a README of it");
       return;
     }
-
+    setLoading(true);
     try {
       const stream = await generateReadme(
         summaries!,
