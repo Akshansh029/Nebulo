@@ -14,7 +14,7 @@ Nebulo is a web application designed to analyze GitHub codebases. It provides re
 
 ![image](https://github.com/user-attachments/assets/0974643c-f6d2-4f94-83c7-49f720e96424)
 
-## 🧪 Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS, Framer Motion
 - **Authentication**: Clerk.js
@@ -24,7 +24,7 @@ Nebulo is a web application designed to analyze GitHub codebases. It provides re
 - **Others**: Vector database for embeddings, GitHub API
 
 
-## 🚀 Features
+## Features
 
 - Landing page with hero section, navigation, and feature highlights
 - Collapsible sidebar for navigation and project selection
@@ -34,7 +34,7 @@ Nebulo is a web application designed to analyze GitHub codebases. It provides re
 - Project creation and GitHub repo syncing
 - Responsive UI with protected routes and loading indicators
 
-## 📸 Screenshots
+## Screenshots
 
 - Dashboard page
 
@@ -56,7 +56,7 @@ Nebulo is a web application designed to analyze GitHub codebases. It provides re
 
 ![image](https://github.com/user-attachments/assets/b2542fcf-9bba-44e8-b209-473240692e60)
 
-## 📦 Usage Instructions
+## Usage Instructions
 
 1. **Sign up and log in** with Clerk authentication.
 2. **Create a project** by entering your GitHub repository URL.
@@ -65,7 +65,7 @@ Nebulo is a web application designed to analyze GitHub codebases. It provides re
 5. **Navigate easily** between projects using the collapsible sidebar.
 
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
   nebulo/
